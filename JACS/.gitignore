@@ -70,7 +70,7 @@ local.properties
 
 ### Java ###
 # Compiled class file
-*.class
+#*.class
 
 # Log file
 *.log
@@ -82,7 +82,7 @@ local.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear
