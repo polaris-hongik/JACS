@@ -1,0 +1,88 @@
+<html><head><style> body {
+    color: black;
+ }
+ </style></head><body><h1 id="jacs-java-ast-collector-for-solidity-">JACS(Java AST Collector for Solidity)</h1>
+<h2 id="version-1-2">version 1.2</h2>
+<p><strong>What&#39;s new?</strong></p>
+<ol>
+<li>New function added.( searchByID(String sourceName, long id) )</li>
+<li>From now on, each node stores the path to the root node.<h2 id="version-1-1">version 1.1</h2>
+<strong>What&#39;s new?</strong></li>
+<li>New function added. ( getAll() )</li>
+<li>Some Issue fixed. 
+ Added <code>IdentifierPath</code> to nodeType applicable to <code>ModifierInvocation.modifierName</code> and <code>InheritanceSpecifier.baseName</code></li>
+</ol>
+<h2 id="version-1-0">version 1.0</h2>
+<p><strong>Parse AST of Solidity to Java Object Structure</strong></p>
+<p>How to Use JACS</p>
+<pre><code class="lang-java"><span class="hljs-meta"><span class="hljs-meta-keyword">import</span> com.chansol.jacs.JACS;</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sample</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> main(String [] args){
+        JACS jacs = <span class="hljs-keyword">new</span> JACS(<span class="hljs-string">"Target Directory"</span>);
+    }
+}
+</code></pre>
+<p>JACS extracts ASTs for all Solidity source codes in the &#39;Target Directory&#39;.</p>
+<p>JACS 1.0 can extract only ASTs for Source Code written in 0.6.x to 0.8.x versions of Solidity Compiler.</p>
+<p>Some errors may be latent because JACS is still in the early stages of development. Therefore, if you think JACS is not working properly, check the debug options to make sure it works properly.</p>
+<p>How to Use JACS with debug Option</p>
+<pre><code class="lang-java"><span class="hljs-meta"><span class="hljs-meta-keyword">import</span> com.chansol.jacs.JACS;</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Sample</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> main(String [] args){
+        JACS jacs = <span class="hljs-keyword">new</span> JACS(<span class="hljs-string">"Target Directory"</span>,<span class="hljs-literal">true</span>);
+    }
+}
+</code></pre>
+<p>The debug option verifies the following factors when JACS collects AST:</p>
+<ul>
+<li>Are all nodes in the AST extracted?</li>
+<li>Are undefined nodes detected?</li>
+<li>Is the Node extracted through the correct object?</li>
+</ul>
+<p>If you find any errors through Debug Mode, please let us know so that we can improve JACS.</p>
+<p>Contact: chansol53@gmail.com</p>
+<h2 id="method-of-jacs">Method of JACS</h2>
+<pre><code class="lang-java"><span class="hljs-function"><span class="hljs-title">getSourceUnits</span><span class="hljs-params">()</span></span> : Vector&lt;SourceUnit&gt;  - JACS
+</code></pre>
+<p>The getSourceUnits() method returns a Vector containing all SourceUnit nodes that JACS succeeded in extracting.</p>
+<pre><code class="lang-java"><span class="hljs-function"><span class="hljs-title">getFailedList</span><span class="hljs-params">()</span></span> : Vector&lt;String&gt; - JACS
+</code></pre>
+<p>The getFailedList() method returns a Vector containing the path to the files and folders that JACS failed to extract.</p>
+<pre><code class="lang-java">getAll(<span class="hljs-keyword">String</span> sourceName) : HashMap&lt;<span class="hljs-keyword">String</span>,<span class="hljs-built_in">Vector</span>&lt;Node&gt;&gt; - JACS
+</code></pre>
+<p>Returns the HashSet of nodes separated by NodeType included in SourceName.</p>
+<pre><code class="lang-java">getAll(<span class="hljs-keyword">String</span> sourceName, <span class="hljs-keyword">String</span> typeName) : HashMap&lt;<span class="hljs-keyword">String</span>,<span class="hljs-built_in">Vector</span>&lt;Node&gt;&gt; - JACS
+</code></pre>
+<p>Returns all nodes corresponding to TypeName included in SourceName.</p>
+<pre><code class="lang-java"> searchByID(<span class="hljs-keyword">String</span> sourceName, long id) : <span class="hljs-keyword">Node</span> <span class="hljs-title">- jacs</span>
+</code></pre>
+<p>Returns the node corresponding to id in sourcename.</p>
+<h2 id="solidity-node-structure">Solidity Node Structure</h2>
+<pre><code class="lang-bash"><span class="hljs-symbol">SourceUnit</span>
+├── <span class="hljs-symbol">PragmaDirective</span>
+├── <span class="hljs-symbol">ImportDirective</span>
+└── <span class="hljs-symbol">ContractDefinition</span>[]
+       ├── baseContracts : <span class="hljs-symbol">InheritanceSpecifier</span>[]
+       └── nodes
+              ├── <span class="hljs-symbol">EnumDefinition</span>
+              │     └── ...
+              ├── <span class="hljs-symbol">FunctionDefinition</span>
+              │     └── ...
+              ├── <span class="hljs-symbol">StructDefinition</span>
+              │     └── ...
+              ├── <span class="hljs-symbol">VariableDeclaration</span>
+              │     └── ...
+              ├── <span class="hljs-symbol">EventDefinition</span>
+              │     └── ...
+              └── <span class="hljs-symbol">ModifierDefinition</span>
+                     └── ...
+</code></pre>
+<h3 id="sourceunit">SourceUnit</h3>
+<p>Node for the solidity source code and the root node of AST.</p>
+<h3 id="pragmadirective">PragmaDirective</h3>
+<p>Node for the definition of the solubility compiler version that must be applied to the solubility source code.</p>
+<h3 id="importdirective">ImportDirective</h3>
+<p>Node for imported contract.</p>
+<h3 id="contractdefinition">ContractDefinition</h3>
+<p>Node for Contract defined in the Solidity Source Code.</p>
+</body></html>
