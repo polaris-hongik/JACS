@@ -3,6 +3,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,java,eclipse
 
 ### Eclipse ###
+processing/
+source/
 .metadata
 bin/
 tmp/
@@ -70,7 +72,7 @@ local.properties
 
 ### Java ###
 # Compiled class file
-*.class
+#*.class
 
 # Log file
 *.log
@@ -82,7 +84,7 @@ local.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear
@@ -121,6 +123,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,java,eclipse
-
-processing/
-source/
