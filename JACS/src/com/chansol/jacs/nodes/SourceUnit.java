@@ -12,7 +12,7 @@ public class SourceUnit extends Node{
 	private HashMap<String, Long> exportedSymbols;
 	private String license;
 	private PragmaDirective pragmaDirective;
-	private ImportDirective importDirective;
+	private Vector<ImportDirective> importDirectives = new Vector<ImportDirective>();
 	private Vector<ContractDefinition> contractDefinitions = new Vector<ContractDefinition>();
 	
 	@SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public class SourceUnit extends Node{
 			if(node.get("nodeType").equals("PragmaDirective")) {
 				this.pragmaDirective = new PragmaDirective(node);
 			}else if(node.get("nodeType").equals("ImportDirective")) {
-				this.importDirective = new ImportDirective(node);
+				importDirectives.add(new ImportDirective(node));
 			}else if(node.get("nodeType").equals("ContractDefinition")) {
 				contractDefinitions.add(new ContractDefinition(node));
 			}
@@ -41,5 +41,5 @@ public class SourceUnit extends Node{
 	public String getLicense() { return license; }
 	public PragmaDirective getPragmaDirective() { return pragmaDirective; }
 	public Vector<ContractDefinition> getContractDefinitions() { return contractDefinitions; }
-	public ImportDirective getImportDirective() { return importDirective; }
+	public Vector<ImportDirective> getImportDirectives() { return importDirectives; }
 }
