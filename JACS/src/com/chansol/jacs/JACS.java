@@ -155,8 +155,8 @@ public class JACS {
 							Node.setDebugMode(debug);
 							SourceUnit sourceUnit = new SourceUnit(jsonObj);
 							extractedSourceUnit.add(sourceUnit);
-							devideByTypes.put(ast.getName().substring(0,ast.getName().indexOf(".")), Node.getDevideByTypes());
-							idNodeMap.put(ast.getName().substring(0,ast.getName().indexOf(".")), Node.getIdNodeMap());
+							devideByTypes.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<String,Vector<Node>>(Node.getDevideByTypes()));
+							idNodeMap.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<Long,Node>(Node.getIdNodeMap()));
 							if(debug) {
 								Node.getIdValidate(jsonObj.toString());
 								System.out.println(ast.getName()+" 추출 성공");
