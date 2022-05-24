@@ -22,26 +22,34 @@ public class JACS {
 	private Vector<SourceUnit> extractedSourceUnit = new Vector<SourceUnit>();
 	private HashMap<String,HashMap<String,Vector<Node>>> devideByTypes = new HashMap<String,HashMap<String,Vector<Node>>>();
 	private HashMap<String,HashMap<Long,Node>> idNodeMap = new HashMap<String,HashMap<Long,Node>>();
-	private HashSet<String> folderList = new HashSet<String>();
+	private HashSet<String> fileList = new HashSet<String>();
 	private String compilerDir = "solidityCompiler\\";
 	private String outputDir = " -o processing\\";
 	private String compileOption = " --ast-compact-json ";
+	private int fileCounter;
 	private boolean debug = false;
 	
 	public JACS(String sourceDir) {
 		File rootFolder = new File(sourceDir);
 		folderScanner(rootFolder);
-		for(String motherDir : folderList) {
+		for(String motherDir : fileList) {
 			getAST(motherDir);
 		}
 	}
 	
 	public JACS(String sourceDir, boolean debug) {
+		fileCounter = 0;
 		this.debug = debug;
 		File rootFolder = new File(sourceDir);
 		folderScanner(rootFolder);
-		for(String motherDir : folderList) {
+		for(String motherDir : fileList) {
 			getAST(motherDir);
+		}
+		if(this.debug) {
+			System.out.println("Collection Result - Total : "+fileCounter+" Success : "+extractedSourceUnit.size()+" Fail : "+extractFailList.size());
+			if(fileCounter != extractedSourceUnit.size() + extractFailList.size()) {
+				System.out.println("File Count Error!");
+			}
 		}
 	}
 	
@@ -51,10 +59,18 @@ public class JACS {
 				//디렉터리인 경우 재귀
 				folderScanner(entity);
 			}else if(entity.getName().endsWith(".sol")){
+				fileCounter ++;
 				//솔리디티 파일인 경우
 				String ver = versionCheck(entity);
 				if(!ver.equals("0.0.0")) {
 					compileSol(versionCheck(entity),entity.getParent(),entity.getAbsolutePath());
+					if(!(new File("processing\\"+entity.getParent()+"\\"+entity.getName()+"_json.ast").exists())) {
+						if(!extractFailList.contains("versionErr("+ver+") : "+entity.getAbsolutePath())) {
+							extractFailList.add(entity.getAbsolutePath());
+						}
+					}else {
+						fileList.add("processing\\"+entity.getParent()+"\\"+entity.getName()+"_json.ast");
+					}
 				}else {
 					extractFailList.add(entity.getAbsolutePath());
 				}
@@ -75,7 +91,6 @@ public class JACS {
 	            	//프래그마 파악
 	            	boolean isPragma = true;
 	            	if(line.contains("//")) {
-	            		System.out.println();
 	            		if(line.indexOf("//") < line.indexOf("pragma ")) {
 	            			isPragma = false;
 	            		}
@@ -101,7 +116,7 @@ public class JACS {
 	        br.close();
 	        if (!extracted) {
 	        	//추출안된 파일
-	        	extractFailList.add("pragmaErr : "+solFile.getAbsolutePath());
+	        	extractFailList.add("pragmaErr("+version+") : "+solFile.getAbsolutePath());
 	        }
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -124,15 +139,13 @@ public class JACS {
 				Process p = rt.exec(compilerDir+ver+".exe"+outputDir+motherDir+compileOption+sourceDir);
 				
 				p.waitFor();
-				folderList.add(motherDir);
 			}
 			else {
 				if(this.debug) {
-					System.out.println("0.8.x버전과 0.6.x 버전 이외에는 현재 지원하지 않습니다");
+					System.out.println("0.8.x버전과 0.6.x 버전 이외에는 현재 지원하지 않습니다.("+ver+")");
 				}
-				extractFailList.add("versionErr : "+sourceDir);
+				extractFailList.add("versionErr("+ver+") : "+sourceDir);
 			}
-		    
 		} catch (IOException e) {
 			extractFailList.add("versionErr(IOE) : "+sourceDir);
 			e.printStackTrace();
@@ -141,32 +154,24 @@ public class JACS {
 		}
 	}
 	
-	private void getAST(String motherDir) {
+	private void getAST(String astFile) {
 		try {
-			File astDirectory = new File("processing\\"+motherDir);
-			if(astDirectory.listFiles() == null) {
-				extractFailList.add("fileErr : "+astDirectory.getAbsolutePath());
-			}else {
-				for(File ast : astDirectory.listFiles()) {
-					if(ast.isFile()) {
-						JSONParser jsonParser = new JSONParser();
-						JSONObject jsonObj = (JSONObject)jsonParser.parse(new FileReader(ast.getAbsolutePath()));
-						if(jsonObj.get("nodeType").equals("SourceUnit")) {
-							Node.setDebugMode(debug);
-							SourceUnit sourceUnit = new SourceUnit(jsonObj);
-							extractedSourceUnit.add(sourceUnit);
-							devideByTypes.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<String,Vector<Node>>(Node.getDevideByTypes()));
-							idNodeMap.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<Long,Node>(Node.getIdNodeMap()));
-							if(debug) {
-								Node.getIdValidate(jsonObj.toString());
-								System.out.println(ast.getName()+" 추출 성공");
-							}
-						}
-					}
+			File ast = new File(astFile);
+			JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObj = (JSONObject)jsonParser.parse(new FileReader(ast.getAbsolutePath()));
+			if(jsonObj.get("nodeType").equals("SourceUnit")) {
+				Node.setDebugMode(debug);
+				SourceUnit sourceUnit = new SourceUnit(jsonObj);
+				extractedSourceUnit.add(sourceUnit);
+				devideByTypes.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<String,Vector<Node>>(Node.getDevideByTypes()));
+				idNodeMap.put(ast.getName().substring(0,ast.getName().indexOf(".")), new HashMap<Long,Node>(Node.getIdNodeMap()));
+				if(debug) {
+					Node.getIdValidate(jsonObj.toString());
+					System.out.println(ast.getName()+" 추출 성공");
 				}
 			}
 		} catch (IOException | ParseException | NullPointerException e) {
-			System.out.println("in "+motherDir);
+			System.out.println("in "+astFile);
 			System.out.println("AST 추출 실패");
 			System.out.println("solc 실행이 성공했다면 solidity 코드의 컴파일 오류일 가능성이 있습니다.");
 			e.printStackTrace();
